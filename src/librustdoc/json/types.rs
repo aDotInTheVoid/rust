@@ -154,7 +154,7 @@ pub enum TypeBindingKind {
 pub struct Id(pub String);
 
 #[serde(rename_all = "snake_case")]
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Copy)]
 pub enum ItemKind {
     Module,
     ExternCrate,

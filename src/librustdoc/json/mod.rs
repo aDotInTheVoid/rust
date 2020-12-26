@@ -7,6 +7,8 @@
 mod conversions;
 pub mod types;
 
+use types::Id;
+
 use std::cell::RefCell;
 use std::fs::File;
 use std::path::PathBuf;
@@ -148,6 +150,7 @@ impl<'tcx> FormatRenderer<'tcx> for JsonRenderer<'tcx> {
     /// the hashmap because certain items (traits and types) need to have their mappings for trait
     /// implementations filled out before they're inserted.
     fn item(&mut self, item: clean::Item, cache: &Cache) -> Result<(), Error> {
+        eprintln!("START {:?}", Id::from(item.def_id));
         // Flatten items that recursively store other items
         item.kind.inner_items().for_each(|i| self.item(i.clone(), cache).unwrap());
 
@@ -167,7 +170,7 @@ impl<'tcx> FormatRenderer<'tcx> for JsonRenderer<'tcx> {
                 assert_eq!(old_item, new_item);
             }
         }
-
+        eprintln!("END");
         Ok(())
     }
 
