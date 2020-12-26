@@ -15,6 +15,7 @@ items = []
 ids = {}
 
 def path(idx):
+    # breakpoint()
     if name:=jinp["index"].get(idx):
         name = name["name"]
     else:
@@ -39,5 +40,13 @@ for i in data:
         indent += TABW
 
 for [item, indent] in items: 
-    
-    print(">" * indent + (" " if indent else "") + path(item[12:-1]), "\t", ids[item])
+    # breakpoint()
+    true_id = item[10:-2]
+    if ty := jinp["index"].get(true_id):
+        ty = ty["kind"]
+    else:
+        ty = "???"
+
+    pre = ">" * indent + (" " if indent else "")
+    pre += path(item[10:-2])
+    print(pre, " "*(25-len(pre)), ty, "\t", ids[item])
