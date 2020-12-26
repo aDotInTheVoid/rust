@@ -655,6 +655,7 @@ impl<'tcx> FormatRenderer<'tcx> for Context<'tcx> {
     }
 
     fn item(&mut self, item: clean::Item, cache: &Cache) -> Result<(), Error> {
+        eprintln!("START {:?}", crate::json::types::Id::from(item.def_id));
         // Stripped modules survive the rustdoc passes (i.e., `strip-private`)
         // if they contain impls for public types. These modules can also
         // contain items such as publicly re-exported structures.
@@ -688,6 +689,7 @@ impl<'tcx> FormatRenderer<'tcx> for Context<'tcx> {
                 self.shared.fs.write(&redir_dst, v.as_bytes())?;
             }
         }
+        eprintln!("END");
         Ok(())
     }
 }
