@@ -152,7 +152,7 @@ impl<'tcx> FormatRenderer<'tcx> for JsonRenderer<'tcx> {
     fn item(&mut self, item: clean::Item, cache: &Cache) -> Result<(), Error> {
         eprintln!("START {:?}", Id::from(item.def_id));
         // Flatten items that recursively store other items
-        item.kind.inner_items().for_each(|i| self.item(i.clone(), cache).unwrap());
+        // item.kind.inner_items().for_each(|i| self.item(i.clone(), cache).unwrap());
 
         let id = item.def_id;
         if let Some(mut new_item) = self.convert_item(item) {
@@ -163,12 +163,10 @@ impl<'tcx> FormatRenderer<'tcx> for JsonRenderer<'tcx> {
             } else if let types::ItemEnum::EnumItem(ref mut e) = new_item.inner {
                 e.impls = self.get_impls(id, cache)
             }
-            let removed = self.index.borrow_mut().insert(id.into(), new_item.clone());
+            let removed = self.index.borrow_mut().insert(id.into(), new_item);
             // FIXME(adotinthevoid): Currently, the index is duplicated. This is a sanity check
             // to make sure the items are unique.
-            if let Some(old_item) = removed {
-                assert_eq!(old_item, new_item);
-            }
+            assert!(removed.is_none())
         }
         eprintln!("END");
         Ok(())
