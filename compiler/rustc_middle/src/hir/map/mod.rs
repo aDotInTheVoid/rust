@@ -154,7 +154,12 @@ impl<'hir> Map<'hir> {
     }
 
     pub fn def_path(&self, def_id: LocalDefId) -> DefPath {
+        // Frame 12
         self.tcx.definitions.def_path(def_id)
+    }
+
+    pub fn try_def_path(&self, def_id: LocalDefId) -> Option<DefPath> {
+        self.tcx.definitions.try_def_path(def_id)
     }
 
     #[inline]

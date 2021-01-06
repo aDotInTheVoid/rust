@@ -1240,9 +1240,19 @@ impl<'tcx> TyCtxt<'tcx> {
     ///  be a non-local `DefPath`.
     pub fn def_path(self, id: DefId) -> rustc_hir::definitions::DefPath {
         if let Some(id) = id.as_local() {
+            // Frame 13
             self.hir().def_path(id)
         } else {
             self.cstore.def_path(id)
+        }
+    }
+
+    pub fn try_def_path(self, id: DefId) -> Option<rustc_hir::definitions::DefPath> {
+        if let Some(id) = id.as_local() {
+            // Frame 13
+            self.hir().try_def_path(id)
+        } else {
+            Some(self.cstore.def_path(id))
         }
     }
 
@@ -1281,8 +1291,34 @@ impl<'tcx> TyCtxt<'tcx> {
             // Don't print the whole crate disambiguator. That's just
             // annoying in debug output.
             &(crate_disambiguator.to_fingerprint().to_hex())[..4],
+            // Frame 14
             self.def_path(def_id).to_string_no_crate_verbose()
         )
+    }
+
+    pub fn try_def_path_debug_str(self, def_id: DefId) -> Option<String> {
+        // We are explicitly not going through queries here in order to get
+        // crate name and disambiguator since this code is called from debug!()
+        // statements within the query system and we'd run into endless
+        // recursion otherwise.
+        let (crate_name, crate_disambiguator) = if def_id.is_local() {
+            (self.crate_name, self.sess.local_crate_disambiguator())
+        } else {
+            (
+                self.cstore.crate_name_untracked(def_id.krate),
+                self.cstore.crate_disambiguator_untracked(def_id.krate),
+            )
+        };
+
+        Some(format!(
+            "{}[{}]{}",
+            crate_name,
+            // Don't print the whole crate disambiguator. That's just
+            // annoying in debug output.
+            &(crate_disambiguator.to_fingerprint().to_hex())[..4],
+            // Frame 14
+            self.try_def_path(def_id)?.to_string_no_crate_verbose()
+        ))
     }
 
     pub fn metadata_encoding_version(self) -> Vec<u8> {

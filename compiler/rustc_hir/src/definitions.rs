@@ -44,7 +44,13 @@ impl DefPathTable {
 
     #[inline(always)]
     pub fn def_key(&self, index: DefIndex) -> DefKey {
+        // Frame 7
         self.index_to_key[index]
+    }
+
+    #[inline(always)]
+    pub fn try_def_key(&self, index: DefIndex) -> Option<DefKey> {
+        self.index_to_key.get(index).copied()
     }
 
     #[inline(always)]
@@ -197,6 +203,7 @@ impl DefPath {
         loop {
             debug!("DefPath::make: krate={:?} index={:?}", krate, index);
             let p = index.unwrap();
+            // Frame 10
             let key = get_key(p);
             debug!("DefPath::make: key={:?}", key);
             match key.disambiguated_data.data {
@@ -212,6 +219,33 @@ impl DefPath {
         }
         data.reverse();
         DefPath { data, krate }
+    }
+
+    pub fn try_make<FN>(krate: CrateNum, start_index: DefIndex, mut get_key: FN) -> Option<DefPath>
+    where
+        FN: FnMut(DefIndex) -> Option<DefKey>,
+    {
+        let mut data = vec![];
+        let mut index = Some(start_index);
+        loop {
+            debug!("DefPath::make: krate={:?} index={:?}", krate, index);
+            let p = index.unwrap();
+            // Frame 10
+            let key = get_key(p)?;
+            debug!("DefPath::make: key={:?}", key);
+            match key.disambiguated_data.data {
+                DefPathData::CrateRoot => {
+                    assert!(key.parent.is_none());
+                    break;
+                }
+                _ => {
+                    data.push(key.disambiguated_data);
+                    index = key.parent;
+                }
+            }
+        }
+        data.reverse();
+        Some(DefPath { data, krate })
     }
 
     /// Returns a string representation of the `DefPath` without
@@ -287,7 +321,12 @@ impl Definitions {
     }
 
     pub fn def_key(&self, id: LocalDefId) -> DefKey {
+        // Frame 8
         self.table.def_key(id.local_def_index)
+    }
+
+    pub fn try_def_key(&self, id: LocalDefId) -> Option<DefKey> {
+        self.table.try_def_key(id.local_def_index)
     }
 
     #[inline(always)]
@@ -301,8 +340,18 @@ impl Definitions {
     /// will be the path of the item in the external crate (but the
     /// path will begin with the path to the external crate).
     pub fn def_path(&self, id: LocalDefId) -> DefPath {
+        // Frame 11
         DefPath::make(LOCAL_CRATE, id.local_def_index, |index| {
+            // Frame 9
             self.def_key(LocalDefId { local_def_index: index })
+        })
+    }
+
+    pub fn try_def_path(&self, id: LocalDefId) -> Option<DefPath> {
+        // Frame 11
+        DefPath::try_make(LOCAL_CRATE, id.local_def_index, |index| {
+            // Frame 9
+            self.try_def_key(LocalDefId { local_def_index: index })
         })
     }
 

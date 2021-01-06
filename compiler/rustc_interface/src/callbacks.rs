@@ -45,7 +45,10 @@ fn def_id_debug(def_id: rustc_hir::def_id::DefId, f: &mut fmt::Formatter<'_>) ->
     write!(f, "DefId({}:{}", def_id.krate, def_id.index.index())?;
     tls::with_opt(|opt_tcx| {
         if let Some(tcx) = opt_tcx {
-            write!(f, " ~ {}", tcx.def_path_debug_str(def_id))?;
+            // Frame 15
+            if let Some(s) = tcx.try_def_path_debug_str(def_id) {
+                write!(f, " ~ {}", s)?;
+            }
         }
         Ok(())
     })?;
