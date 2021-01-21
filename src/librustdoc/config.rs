@@ -155,6 +155,8 @@ crate struct Options {
     /// If this option is set to `true`, rustdoc will only run checks and not generate
     /// documentation.
     crate run_check: bool,
+
+    crate dump_clean: bool,
 }
 
 impl fmt::Debug for Options {
@@ -596,6 +598,7 @@ impl Options {
         let document_private = matches.opt_present("document-private-items");
         let document_hidden = matches.opt_present("document-hidden-items");
         let run_check = matches.opt_present("check");
+        let dump_clean = matches.opt_present("dump-clean");
 
         let (lint_opts, describe_lints, lint_cap) = get_cmd_lint_options(matches, error_format);
 
@@ -632,6 +635,7 @@ impl Options {
             enable_per_target_ignores,
             test_builder,
             run_check,
+            dump_clean,
             render_options: RenderOptions {
                 output,
                 external_html,

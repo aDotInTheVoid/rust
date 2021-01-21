@@ -423,6 +423,7 @@ fn opts() -> Vec<RustcOptGroup> {
             o.optopt("", "test-builder", "The rustc-like binary to use as the test builder", "PATH")
         }),
         unstable("check", |o| o.optflag("", "check", "Run rustdoc checks")),
+        unstable("dump-clean", |o| o.optflag("", "dump-clean", "Print the `clean`")),
     ]
 }
 
@@ -518,6 +519,8 @@ fn main_options(options: config::Options) -> MainResult {
     let show_coverage = options.show_coverage;
     let run_check = options.run_check;
 
+    let dump_clean = options.dump_clean;
+
     // First, parse the crate and extract all relevant information.
     info!("starting to run rustc");
 
@@ -571,6 +574,9 @@ fn main_options(options: config::Options) -> MainResult {
                     return Ok(());
                 } else if run_check {
                     // Since we're in "check" mode, no need to generate anything beyond this point.
+                    return Ok(());
+                } else if dump_clean {
+                    println!("{:#?}", krate);
                     return Ok(());
                 }
 

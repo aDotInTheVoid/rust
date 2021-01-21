@@ -95,9 +95,9 @@ impl fmt::Debug for Item {
         let def_id: &dyn fmt::Debug = if self.is_fake() { &"**FAKE**" } else { &self.def_id };
 
         fmt.debug_struct("Item")
-            .field("source", &self.source)
+            // .field("source", &self.source)
             .field("name", &self.name)
-            .field("attrs", &self.attrs)
+            // .field("attrs", &self.attrs)
             .field("kind", &self.kind)
             .field("visibility", &self.visibility)
             .field("def_id", def_id)
@@ -1796,12 +1796,18 @@ impl Visibility {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 crate struct Struct {
     crate struct_type: CtorKind,
     crate generics: Generics,
     crate fields: Vec<Item>,
     crate fields_stripped: bool,
+}
+
+impl std::fmt::Debug for Struct {
+    fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
+        fmt.debug_struct("Struct").finish()
+    }
 }
 
 #[derive(Clone, Debug)]
