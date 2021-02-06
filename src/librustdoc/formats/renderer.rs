@@ -84,7 +84,9 @@ crate fn run_format<'tcx, T: FormatRenderer<'tcx>>(
 
     let unknown = rustc_span::Symbol::intern("<unknown item>");
     while let Some((mut cx, item)) = work.pop() {
-        debug("Starting item {:?}", item.id);
+
+        // let x: () = item;
+        debug!("run_format: Starting item {:?}", item.def_id);
         if item.is_mod() {
             // modules are special because they add a namespace. We also need to
             // recurse into the items of the module as well.
@@ -96,7 +98,8 @@ crate fn run_format<'tcx, T: FormatRenderer<'tcx>>(
 
             cx.mod_item_in(&item, &name)?;
             let module = match *item.kind {
-                clean::StrippedItem(box clean::ModuleItem(m)) | clean::ModuleItem(m) => m,
+                /* clean::StrippedItem(box clean::ModuleItem(m)) */ | clean::ModuleItem(m) => m,
+                clean::StrippedItem(_) => continue,
                 _ => unreachable!(),
             };
             for it in module.items {

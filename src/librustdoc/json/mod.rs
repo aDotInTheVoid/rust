@@ -154,14 +154,20 @@ impl<'tcx> FormatRenderer<'tcx> for JsonRenderer<'tcx> {
     /// implementations filled out before they're inserted.
     fn item(&mut self, item: clean::Item) -> Result<(), Error> {
         // Flatten items that recursively store other items
-        item.kind.inner_items().for_each(|i| self.item(i.clone()).unwrap());
+
+
+
+        item.kind.inner_items().for_each(|i|{ 
+            debug!("recursing into {:?}, {:?}", i.def_id, i.name);
+            self.item(i.clone()).unwrap();
+        });
 
         let id = item.def_id;
         
         
         
         if let Some(mut new_item) = self.convert_item(item) {
-           debug!("Converting {:?}", new_item.id);
+           debug!("json:item {:?}, {:?}", new_item.id, new_item.name);
 
             if let types::ItemEnum::TraitItem(ref mut t) = new_item.inner {
                 t.implementors = self.get_trait_implementors(id)
