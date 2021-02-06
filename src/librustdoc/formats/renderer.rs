@@ -70,6 +70,8 @@ crate fn run_format<'tcx, T: FormatRenderer<'tcx>>(
         .extra_verbose_generic_activity("create_renderer", T::descr())
         .run(|| T::init(krate, options, render_info, edition, cache, tcx))?;
 
+    debug!("Got crate");
+
     let mut item = match krate.module.take() {
         Some(i) => i,
         None => return Ok(()),
@@ -82,6 +84,7 @@ crate fn run_format<'tcx, T: FormatRenderer<'tcx>>(
 
     let unknown = rustc_span::Symbol::intern("<unknown item>");
     while let Some((mut cx, item)) = work.pop() {
+        debug("Starting item {:?}", item.id);
         if item.is_mod() {
             // modules are special because they add a namespace. We also need to
             // recurse into the items of the module as well.

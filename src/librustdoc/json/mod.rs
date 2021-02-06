@@ -159,11 +159,9 @@ impl<'tcx> FormatRenderer<'tcx> for JsonRenderer<'tcx> {
         let id = item.def_id;
         
         
+        
         if let Some(mut new_item) = self.convert_item(item) {
-            if new_item.name == Some("Public".into()) {
-                dbg!(new_item);
-                panic!();
-            }
+           debug!("Converting {:?}", new_item.id);
 
             if let types::ItemEnum::TraitItem(ref mut t) = new_item.inner {
                 t.implementors = self.get_trait_implementors(id)
