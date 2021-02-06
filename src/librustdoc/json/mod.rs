@@ -157,7 +157,14 @@ impl<'tcx> FormatRenderer<'tcx> for JsonRenderer<'tcx> {
         item.kind.inner_items().for_each(|i| self.item(i.clone()).unwrap());
 
         let id = item.def_id;
+        
+        
         if let Some(mut new_item) = self.convert_item(item) {
+            if new_item.name == Some("Public".into()) {
+                dbg!(new_item);
+                panic!();
+            }
+
             if let types::ItemEnum::TraitItem(ref mut t) = new_item.inner {
                 t.implementors = self.get_trait_implementors(id)
             } else if let types::ItemEnum::StructItem(ref mut s) = new_item.inner {

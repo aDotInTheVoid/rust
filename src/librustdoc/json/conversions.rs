@@ -178,7 +178,9 @@ impl From<clean::ItemKind> for ItemEnum {
                 bounds: g.into_iter().map(Into::into).collect(),
                 default: t.map(Into::into),
             },
-            StrippedItem(inner) => (*inner).into(),
+            StrippedItem(inner) => {
+                panic!("NIXON LOOK HERE")
+            },
             PrimitiveItem(_) | KeywordItem(_) => {
                 panic!("{:?} is not supported for JSON output", item)
             }
