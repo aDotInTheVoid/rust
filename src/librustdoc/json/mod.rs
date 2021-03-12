@@ -129,6 +129,8 @@ impl<'tcx> FormatRenderer<'tcx> for JsonRenderer<'tcx> {
         "json"
     }
 
+    const RUN_ON_STRIPED: bool = false;
+
     fn init(
         krate: clean::Crate,
         options: RenderOptions,

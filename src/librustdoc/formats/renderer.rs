@@ -13,6 +13,10 @@ crate trait FormatRenderer<'tcx>: Sized {
     /// Gives a description of the renderer. Used for performance profiling.
     fn descr() -> &'static str;
 
+    /// Whether to call `item` on `clean::StrippedItem`
+    /// See #80664
+    const RUN_ON_STRIPED: bool;
+
     /// Sets up any state required for the renderer. When this is called the cache has already been
     /// populated.
     fn init(
@@ -84,13 +88,22 @@ crate fn run_format<'tcx, T: FormatRenderer<'tcx>>(
             let _timer = prof.generic_activity_with_arg("render_mod_item", name.as_str());
 
             cx.mod_item_in(&item, &name)?;
-            let module = match *item.kind {
-                clean::StrippedItem(box clean::ModuleItem(m)) | clean::ModuleItem(m) => m,
+
+            if let Some(module) = match *item.kind {
+                clean::ModuleItem(m) => Some(m),
+                clean::StrippedItem(box clean::ModuleItem(m)) => {
+                    if T::RUN_ON_STRIPED {
+                        Some(m)
+                    } else {
+                        None
+                    }
+                }
                 _ => unreachable!(),
-            };
-            for it in module.items {
-                debug!("Adding {:?} to worklist", it.name);
-                work.push((cx.make_child_renderer(), it));
+            } {
+                for it in module.items {
+                    debug!("Adding {:?} to worklist", it.name);
+                    work.push((cx.make_child_renderer(), it));
+                }
             }
 
             cx.mod_item_out(&name)?;
