@@ -157,6 +157,8 @@ pub struct TestProps {
     pub should_ice: bool,
     // If true, the stderr is expected to be different across bit-widths.
     pub stderr_per_bitwidth: bool,
+    // If true, use `jsondocck_ng`
+    pub use_jsondocck_ng: bool,
 }
 
 mod directives {
@@ -189,6 +191,7 @@ mod directives {
     pub const STDERR_PER_BITWIDTH: &'static str = "stderr-per-bitwidth";
     pub const INCREMENTAL: &'static str = "incremental";
     pub const KNOWN_BUG: &'static str = "known-bug";
+    pub const USE_JSONDOCCK_NG: &'static str = "use-jsondocck-ng";
 }
 
 impl TestProps {
@@ -230,6 +233,7 @@ impl TestProps {
             assembly_output: None,
             should_ice: false,
             stderr_per_bitwidth: false,
+            use_jsondocck_ng: false,
         }
     }
 
@@ -313,6 +317,7 @@ impl TestProps {
                 );
                 config.set_name_directive(ln, NO_PREFER_DYNAMIC, &mut self.no_prefer_dynamic);
                 config.set_name_directive(ln, PRETTY_EXPANDED, &mut self.pretty_expanded);
+                config.set_name_directive(ln, USE_JSONDOCCK_NG, &mut self.use_jsondocck_ng);
 
                 if let Some(m) = config.parse_name_value_directive(ln, PRETTY_MODE) {
                     self.pretty_mode = m;

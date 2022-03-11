@@ -1306,6 +1306,8 @@ note: if you're sure you want to do this, please open an issue as to why. In the
             let json_compiler = compiler.with_stage(0);
             cmd.arg("--jsondocck-path")
                 .arg(builder.ensure(tool::JsonDocCk { compiler: json_compiler, target }));
+            cmd.arg("--jsondocck-ng-path")
+                .arg(builder.ensure(tool::JsonDocCkNg { compiler: json_compiler, target }));
         }
 
         if mode == "run-make" && suite.ends_with("fulldeps") {

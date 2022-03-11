@@ -207,6 +207,9 @@ pub struct Config {
     /// The jsondocck executable.
     pub jsondocck_path: Option<String>,
 
+    /// The jsondocck-ng executable.
+    pub jsondocck_ng_path: Option<String>,
+
     /// The LLVM `FileCheck` binary path.
     pub llvm_filecheck: Option<PathBuf>,
 

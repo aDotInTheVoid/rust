@@ -46,6 +46,7 @@ fn config() -> Config {
         "--lldb-python=",
         "--docck-python=",
         "--jsondocck-path=",
+        "--jsondocck-ng-path=",
         "--src-base=",
         "--build-base=",
         "--stage-id=stage2",

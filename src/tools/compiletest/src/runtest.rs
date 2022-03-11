@@ -2410,8 +2410,6 @@ impl<'test> TestCx<'test> {
     }
 
     fn run_rustdoc_json_test(&self) {
-        //FIXME: Add bless option.
-
         assert!(self.revision.is_none(), "revisions not relevant here");
 
         let out_dir = self.output_base_dir();
@@ -2426,6 +2424,24 @@ impl<'test> TestCx<'test> {
         let root = self.config.find_rust_src_root().unwrap();
         let mut json_out = out_dir.join(self.testpaths.file.file_stem().unwrap());
         json_out.set_extension("json");
+
+        if self.props.use_jsondocck_ng {
+            // We don't want the absolute path, because jsondocck-ng will resolve the tests file to a function.
+            let test_file_name = self.testpaths.file.strip_prefix(&self.config.src_base).unwrap();
+
+            let docck_res = self.cmd2procres(
+                Command::new(self.config.jsondocck_ng_path.as_ref().unwrap())
+                    .arg("--doc-dir")
+                    .arg(root.join(&out_dir))
+                    .arg("--test-file")
+                    .arg(&test_file_name),
+            );
+
+            if !docck_res.status.success() {
+                self.fatal_proc_rec("jsondocck-ng failed!", &docck_res);
+            }
+        }
+
         let res = self.cmd2procres(
             Command::new(self.config.jsondocck_path.as_ref().unwrap())
                 .arg("--doc-dir")
