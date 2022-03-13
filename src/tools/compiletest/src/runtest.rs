@@ -27,7 +27,7 @@ use std::fs::{self, create_dir_all, File, OpenOptions};
 use std::hash::{Hash, Hasher};
 use std::io::prelude::*;
 use std::io::{self, BufReader};
-use std::path::{Path, PathBuf};
+use std::path::{Component, Path, PathBuf};
 use std::process::{Command, ExitStatus, Output, Stdio};
 use std::str;
 
@@ -2422,19 +2422,34 @@ impl<'test> TestCx<'test> {
         }
 
         let root = self.config.find_rust_src_root().unwrap();
+        // TODO: Handle when tests do `![crate_name = "..."]`
+
         let mut json_out = out_dir.join(self.testpaths.file.file_stem().unwrap());
         json_out.set_extension("json");
 
         if self.props.use_jsondocck_ng {
-            // We don't want the absolute path, because jsondocck-ng will resolve the tests file to a function.
-            let test_file_name = self.testpaths.file.strip_prefix(&self.config.src_base).unwrap();
+            let test_path =
+                self.testpaths.file.strip_prefix(&self.config.src_base).unwrap().with_extension("");
+
+            // We cant just use the path, because of different path seperators
+            let mut test_name = OsString::new();
+            for c in test_path.components() {
+                let c = if let Component::Normal(c) = c {
+                    c
+                } else {
+                    panic!("Got non normal component {c:?} in path {test_path:?}")
+                };
+
+                test_name.push("::");
+                test_name.push(c);
+            }
 
             let docck_res = self.cmd2procres(
                 Command::new(self.config.jsondocck_ng_path.as_ref().unwrap())
-                    .arg("--doc-dir")
-                    .arg(root.join(&out_dir))
-                    .arg("--test-file")
-                    .arg(&test_file_name),
+                    .arg("--json-path")
+                    .arg(json_out)
+                    .arg("--test-name")
+                    .arg(&test_name),
             );
 
             if !docck_res.status.success() {
