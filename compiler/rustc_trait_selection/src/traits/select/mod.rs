@@ -1004,13 +1004,23 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
                     // get unified with some const that is not of type `usize`.
                     let ct = self.infcx.shallow_resolve_const(ct);
                     let ct_ty = match ct.kind() {
-                        ty::ConstKind::Infer(ty::InferConst::Var(_)) => {
+                        ty::ConstKind::Infer(_) => {
                             return Ok(EvaluatedToAmbig);
                         }
                         ty::ConstKind::Error(_) => return Ok(EvaluatedToOk),
-                        // THISPR
-                        _ => todo!(),
-                        // _ => ct.ty(),
+                        ty::ConstKind::Value(ty, _) => ty,
+                        ty::ConstKind::Unevaluated(uv) => {
+                            self.tcx().type_of(uv.def).instantiate(self.tcx(), uv.args)
+                        }
+                        // FIXME(generic_const_exprs): See comment in `fulfill.rs`
+                        ty::ConstKind::Expr(_) => return Ok(EvaluatedToOk),
+                        ty::ConstKind::Placeholder(_) => {
+                            bug!("placeholder const {:?} in old solver", ct)
+                        }
+                        ty::ConstKind::Bound(_, _) => bug!("escaping bound vars in {:?}", ct),
+                        ty::ConstKind::Param(param_ct) => {
+                            param_ct.find_ty_from_env(obligation.param_env)
+                        }
                     };
 
                     match self.infcx.at(&obligation.cause, obligation.param_env).eq(
