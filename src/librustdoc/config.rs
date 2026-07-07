@@ -529,14 +529,18 @@ impl Options {
                         OutputFormat::Html | OutputFormat::IrJson | OutputFormat::CoverageJson => {}
                         OutputFormat::Doctest => unreachable!(),
                     },
-                    EmitType::HtmlStaticFiles | EmitType::HtmlNonStaticFiles => match output_format
-                    {
-                        OutputFormat::Html => {}
-                        OutputFormat::IrJson | OutputFormat::CoverageJson => dcx.fatal(format!(
-                            "the `--emit={typ}` flag is not supported with `--output-format=json`",
-                        )),
-                        OutputFormat::Doctest => unreachable!(),
-                    },
+                    EmitType::HtmlStaticFiles | EmitType::HtmlNonStaticFiles => {
+                        match output_format {
+                            OutputFormat::Html => {}
+                            OutputFormat::IrJson | OutputFormat::CoverageJson => dcx.fatal(format!(
+                                "the `--emit={typ}` flag is not supported with `--output-format=json`",
+                            )),
+                            OutputFormat::Doctest => unreachable!(),
+                        }
+                        if show_coverage {
+                            dcx.fatal("the `--emit=dep-info` flag is not supported with `--show-coverage`");
+                        }
+                    }
                     EmitType::IrJsonFiles | EmitType::CoverageJsonFiles => unreachable!(),
                 }
 
